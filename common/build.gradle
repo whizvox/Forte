@@ -1,0 +1,7 @@
+def NETTY_VERSION = '5.0.0.Alpha2'
+def SQLITE_VERSION = '3.8.11.2'
+
+dependencies {
+    compile "io.netty:netty-all:$NETTY_VERSION"
+    compile "org.xerial:sqlite-jdbc:$SQLITE_VERSION"
+}

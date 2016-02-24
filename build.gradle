@@ -1,0 +1,12 @@
+subprojects {
+
+    version 'dev-1.0'
+
+    apply plugin: 'java'
+
+    repositories {
+        mavenCentral()
+    }
+
+
+}

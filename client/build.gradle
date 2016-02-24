@@ -1,0 +1,14 @@
+apply plugin: 'application'
+
+def LWJGL_VERSION = '3.0.0b'
+
+mainClassName = 'whizvox.forte.client.core.ForteClient'
+
+dependencies {
+    compile "org.lwjgl:lwjgl:$LWJGL_VERSION"
+    compile "org.lwjgl:lwjgl-platform:$LWJGL_VERSION:natives-windows"
+    compile "org.lwjgl:lwjgl-platform:$LWJGL_VERSION:natives-linux"
+    compile "org.lwjgl:lwjgl-platform:$LWJGL_VERSION:natives-osx"
+    compile files('libs/PNGDecoder.jar')
+    compile project(':common')
+}

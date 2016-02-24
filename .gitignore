@@ -1,0 +1,8 @@
+# Gradle stuff
+/client/build
+/common/build
+/.gradle
+
+#IntelliJ Stuff
+*.iml
+*.idea
