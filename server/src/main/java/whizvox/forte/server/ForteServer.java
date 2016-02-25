@@ -1,11 +1,12 @@
 package whizvox.forte.server;
 
 import whizvox.forte.common.Application;
+import whizvox.forte.common.Props;
 
 public class ForteServer extends Application {
 
     @Override
-    protected void init(String[] progArgs) {
+    protected void init(Props parameters) {
 
     }
 

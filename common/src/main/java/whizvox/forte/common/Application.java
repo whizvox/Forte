@@ -8,42 +8,62 @@ public abstract class Application implements Runnable {
 
     protected Application() {}
 
-    protected abstract void init(String[] progArgs);
+    protected abstract void init(Props parameters);
 
     public final void begin(String[] args) {
-        init(args);
-        // TODO: More to this
+        Props parameters = convertParametersToProps(args);
+        root = new File(parameters.get("root", "."));
+        init(parameters);
+        new Thread(this).start();
     }
 
-    public static String concatStringArgs(String[] args, int offset) {
+    public final File getRoot() {
+        return root;
+    }
+
+    public static Props convertParametersToProps(String[] params) {
+        Props props = new Props();
         StringBuilder sb = new StringBuilder();
-        for (int i = offset; i < args.length; i++) {
-            String arg = args[i];
-            int indexOf = arg.indexOf('"');
-            if (indexOf != -1) {
-                int indexOf2 = arg.indexOf('"', indexOf + 1);
-                if (indexOf2 != -1) {
-                    sb.append(arg.substring(indexOf + 1, indexOf2));
-                    break;
+        for (String par : params) {
+            sb.append(par).append(' ');
+        }
+        String s = sb.toString();
+        String key = null, value = null;
+        int first = 0;
+        boolean openQuote = false;
+        for (int i = 0; i < s.toCharArray().length; i++) {
+            char c = s.charAt(i);
+            if (c == '"') {
+                if (openQuote) {
+                    value = s.substring(first, i);
+                    openQuote = false;
+                    if (key != null) {
+                        props.set(key, value);
+                        key = null;
+                        value = null;
+                    }
                 } else {
-                    if (sb.length() != 0) {
-                        sb.append(arg.substring(0, indexOf));
-                        break;
-                    } else {
-                        sb.append(arg.substring(indexOf + 1));
+                    first = i + 1;
+                    openQuote = true;
+                }
+            } else if (c == '=') {
+                if (!openQuote) {
+                    key = s.substring(first, i);
+                    first = i + 1;
+                }
+            } else if (c == ' ') {
+                if (!openQuote) {
+                    if (key != null) {
+                        value = s.substring(first, i);
+                        props.set(key, value);
+                        key = null;
+                        value = null;
+                        first = i + 1;
                     }
                 }
-            } else {
-                sb.append(arg);
             }
-            sb.append(' ');
         }
-        return sb.toString();
-    }
-
-    public static void start(String[] args, Application application) {
-        application.init(args);
-        new Thread(application).start();
+        return props;
     }
 
 }

@@ -12,6 +12,10 @@ public class Props {
 
     }
 
+    public boolean contains(String key) {
+        return entries.containsKey(key);
+    }
+
     public void set(String key, String value) {
         entries.put(key, value);
     }
@@ -59,6 +63,10 @@ public class Props {
 
     public boolean get(String key, boolean def) {
         return StringUtils.parseBoolean(getObject(key, def));
+    }
+
+    public boolean isEmpty() {
+        return entries.isEmpty();
     }
 
     public void save(OutputStream out) {

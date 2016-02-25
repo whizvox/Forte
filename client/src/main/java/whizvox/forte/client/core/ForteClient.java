@@ -5,6 +5,7 @@ import whizvox.forte.client.render.GLUtil;
 import whizvox.forte.client.render.Window;
 import whizvox.forte.common.Application;
 import whizvox.forte.common.Logger;
+import whizvox.forte.common.Props;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -34,10 +35,10 @@ public class ForteClient extends Application {
     }
 
     @Override
-    protected void init(String[] progArgs) {
-        if (progArgs.length > 1) {
-            if (progArgs[0].equals("-r")) {
-                root = new File(Application.concatStringArgs(progArgs, 1));
+    protected void init(Props parameters) {
+        if (parameters.length > 1) {
+            if (parameters[0].equals("-r")) {
+                root = new File(Application.concatStringArgs(parameters, 1));
             }
         }
         if (root == null) {
@@ -83,7 +84,7 @@ public class ForteClient extends Application {
         return rootDir.toFile();
     }
 
-    public static void main(String[] args) {
+    public static void main(Props args) {
         (instance = new ForteClient()).begin(args);
     }
 
