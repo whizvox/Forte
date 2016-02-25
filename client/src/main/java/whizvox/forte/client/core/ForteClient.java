@@ -16,12 +16,11 @@ public class ForteClient extends Application {
     private Logger logger;
     private Window window;
     private Settings settings;
-    private File root = null;
 
     @Override
     public void run() {
         try {
-            Files.init(root);
+            Files.init(getRoot());
             logger = new ClientLogger();
             settings = new Settings();
             window = new ClientWindow();
@@ -36,14 +35,7 @@ public class ForteClient extends Application {
 
     @Override
     protected void init(Props parameters) {
-        if (parameters.length > 1) {
-            if (parameters[0].equals("-r")) {
-                root = new File(Application.concatStringArgs(parameters, 1));
-            }
-        }
-        if (root == null) {
-            root = getDefaultRootDir();
-        }
+
     }
 
     public void loop() {
@@ -84,7 +76,7 @@ public class ForteClient extends Application {
         return rootDir.toFile();
     }
 
-    public static void main(Props args) {
+    public static void main(String[] args) {
         (instance = new ForteClient()).begin(args);
     }
 
