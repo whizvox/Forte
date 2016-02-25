@@ -1,44 +1,30 @@
 package whizvox.forte.client.core;
 
+import whizvox.forte.client.input.Input;
 import whizvox.forte.client.render.GLUtil;
 import whizvox.forte.client.render.Window;
+import whizvox.forte.common.Application;
 import whizvox.forte.common.Logger;
 
 import java.io.File;
-import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class ForteClient implements Runnable {
+public class ForteClient extends Application {
 
     private Logger logger;
     private Window window;
     private Settings settings;
-    private final File root;
-
-    public ForteClient(File root) {
-        this.root = root;
-    }
+    private File root = null;
 
     @Override
     public void run() {
         try {
             Files.init(root);
-            logger = new Logger(System.out, "ForteClient", new PrintStream(Files.getLogFile()));
-            System.setOut(logger);
-            System.setErr(logger);
+            logger = new ClientLogger();
             settings = new Settings();
-            window = new Window();
-            window.setTitle("Forte Client (Dev-1.0)");
-            window.setSize(settings.getWinWidth(), settings.getWinHeight());
-            window.setVisible(false);
-            window.setFullscreen(settings.isFullscreen());
-            window.setDecorated(settings.isDecorated());
-            window.create();
-            window.setVisible(true);
-
+            window = new ClientWindow();
             Input.init();
-
             while (!window.shouldClose()) {
                 loop();
             }
@@ -47,11 +33,21 @@ public class ForteClient implements Runnable {
         }
     }
 
+    @Override
+    protected void init(String[] progArgs) {
+        if (progArgs.length > 1) {
+            if (progArgs[0].equals("-r")) {
+                root = new File(Application.concatStringArgs(progArgs, 1));
+            }
+        }
+        if (root == null) {
+            root = getDefaultRootDir();
+        }
+    }
+
     public void loop() {
         GLUtil.clear();
-
-
-
+        Input.poll();
         window.update();
     }
 
@@ -71,32 +67,6 @@ public class ForteClient implements Runnable {
         return instance.window;
     }
 
-    private static String getStringFromArray(String[] array, int offset) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = offset; i < array.length; i++) {
-            String arg = array[i];
-            int indexOf = arg.indexOf('"');
-            if (indexOf != -1) {
-                int indexOf2 = arg.indexOf('"', indexOf + 1);
-                if (indexOf2 != -1) {
-                    sb.append(arg.substring(indexOf + 1, indexOf2));
-                    break;
-                } else {
-                    if (sb.length() != 0) {
-                        sb.append(arg.substring(0, indexOf));
-                        break;
-                    } else {
-                        sb.append(arg.substring(indexOf + 1));
-                    }
-                }
-            } else {
-                sb.append(arg);
-            }
-            sb.append(' ');
-        }
-        return sb.toString();
-    }
-
     private static File getDefaultRootDir() {
         String osName = System.getProperty("os.name");
         String userDir = System.getProperty("user.home");
@@ -114,17 +84,7 @@ public class ForteClient implements Runnable {
     }
 
     public static void main(String[] args) {
-        File root = null;
-        if (args.length > 1) {
-            if (args[0].equals("-r")) {
-                root = new File(getStringFromArray(args, 1));
-            }
-        }
-        if (root == null) {
-            root = getDefaultRootDir();
-        }
-        instance = new ForteClient(root);
-        new Thread(instance).start();
+        (instance = new ForteClient()).begin(args);
     }
 
 }

@@ -6,7 +6,8 @@ import org.lwjgl.opengl.GL11;
 import whizvox.forte.client.core.ForteClient;
 import whizvox.forte.client.math.Matrix4f;
 import whizvox.forte.client.math.Vector2f;
-import whizvox.forte.client.util.IOUtil;
+import whizvox.forte.client.util.GLColor;
+import whizvox.forte.common.IOUtils;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -46,11 +47,11 @@ public class Renderer {
         drawing = false;
 
         if (modern) {
-            shader_vert = Shader.loadVertex(IOUtil.getInternalResource("resources/default.vert"));
-            shader_frag = Shader.loadFragment(IOUtil.getInternalResource("resources/default.frag"));
+            shader_vert = Shader.loadVertex(IOUtils.getInternalResource("resources/default.vert"));
+            shader_frag = Shader.loadFragment(IOUtils.getInternalResource("resources/default.frag"));
         } else {
-            shader_vert = Shader.loadVertex(IOUtil.getInternalResource("resources/legacy.vert"));
-            shader_frag = Shader.loadFragment(IOUtil.getInternalResource("resources/legacy.frag"));
+            shader_vert = Shader.loadVertex(IOUtils.getInternalResource("resources/legacy.vert"));
+            shader_frag = Shader.loadFragment(IOUtils.getInternalResource("resources/legacy.frag"));
         }
 
         program = new ShaderProgram();
@@ -138,12 +139,40 @@ public class Renderer {
         }
     }
 
-    public void renderTexture(Vector2f winPos1, Vector2f winPos2, Vector2f)
+    public void renderTexture(Texture texture, float x, float y) {
+        renderTextureRegion(texture, x, y, 0, 0, texture.getWidth(), texture.getHeight(), GLColor.WHITE);
+    }
 
-    public void renderTexture(float x1, float y1, float x2, float y2, float s1, float t1, float s2, float t2, float r, float g, float b) {
+    public void renderTexture(Texture texture, float x, float y, GLColor color) {
+        renderTextureRegion(texture, x, y, 0, 0, texture.getWidth(), texture.getHeight(), color);
+    }
+
+    public void renderTextureRegion(Texture texture, float x, float y, int regX, int regY, int regWidth, int regHeight) {
+        renderTextureRegion(texture, x, y, regX, regY, regWidth, regHeight, GLColor.WHITE);
+    }
+
+    public void renderTextureRegion(Texture texture, float x, float y, int regX, int regY, int regWidth, int regHeight, GLColor color) {
+        float x2 = x + texture.getWidth();
+        float y2 = y + texture.getHeight();
+        float s1 = (float) regX / texture.getWidth();
+        float t1 = (float) regY / texture.getHeight();
+        float s2 = (float) (regX + regWidth) / texture.getWidth();
+        float t2 = (float) (regY + regHeight) / texture.getHeight();
+        renderTextureRegion(x, y, x2, y2, s1, t1, s2, t2, color);
+    }
+
+    public void renderTextureRegion(Vector2f winPos1, Vector2f winPos2, Vector2f texPos1, Vector2f texPos2, GLColor color) {
+        renderTextureRegion(winPos1.x, winPos1.y, winPos2.x, winPos2.y, texPos1.x, texPos1.y, texPos2.x, texPos2.y, color);
+    }
+
+    public void renderTextureRegion(float x1, float y1, float x2, float y2, float s1, float t1, float s2, float t2, GLColor color) {
         if (vertices.remaining() < 42) {
             flush();
         }
+
+        float r = color.getRed();
+        float g = color.getGreen();
+        float b = color.getBlue();
 
         vertices.put(x1).put(y1).put(r).put(g).put(b).put(s1).put(t1)
                 .put(x1).put(y2).put(r).put(g).put(b).put(s1).put(t2)
