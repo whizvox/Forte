@@ -12,3 +12,9 @@ dependencies {
     compile files('libs/PNGDecoder.jar')
     compile project(':common')
 }
+
+run {
+    if (System.getProperty("exec.args") != null) {
+        args System.getProperty("exec.args").split()
+    }
+}

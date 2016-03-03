@@ -1,12 +1,12 @@
 package whizvox.forte.common;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class Props {
 
-    private static Map<String, String> entries = new HashMap<>();
+    private static Map<String, String> entries = new TreeMap<>();
 
     public Props() {
 
@@ -63,6 +63,10 @@ public class Props {
 
     public boolean get(String key, boolean def) {
         return StringUtils.parseBoolean(getObject(key, def));
+    }
+
+    public byte[] get(String key, byte[] def) {
+        return StringUtils.stringToBytes(get(key, StringUtils.bytesToString(def)));
     }
 
     public boolean isEmpty() {

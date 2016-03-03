@@ -1,47 +1,43 @@
 package whizvox.forte.client.core;
 
-import whizvox.forte.client.input.Input;
-import whizvox.forte.client.render.GLUtil;
 import whizvox.forte.client.render.Window;
 import whizvox.forte.common.Application;
 import whizvox.forte.common.Logger;
 import whizvox.forte.common.Props;
+import whizvox.forte.common.Timer;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.FileNotFoundException;
 
 public class ForteClient extends Application {
 
+    public static final boolean DEBUG = true;
+    public static final String NAME = "Forte", VERSION = "Dev-1.0";
+
     private Logger logger;
-    private Window window;
     private Settings settings;
+
+    private UpdateTimer updateTimer;
+    private RenderTimer renderTimer;
 
     @Override
     public void run() {
-        try {
-            Files.init(getRoot());
-            logger = new ClientLogger();
-            settings = new Settings();
-            window = new ClientWindow();
-            Input.init();
-            while (!window.shouldClose()) {
-                loop();
-            }
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
+        Timer.start(updateTimer);
+        Timer.start(renderTimer);
     }
 
     @Override
     protected void init(Props parameters) {
-
-    }
-
-    public void loop() {
-        GLUtil.clear();
-        Input.poll();
-        window.update();
+        Files.init(getRoot());
+        settings = new Settings();
+        settings.load();
+        try {
+            logger = new ClientLogger();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Could not initialize logger!");
+        }
+        updateTimer = new UpdateTimer();
+        renderTimer = new RenderTimer();
     }
 
     /* ========== STATIC STUFF ========== */
@@ -57,23 +53,12 @@ public class ForteClient extends Application {
     }
 
     public static Window getWindow() {
-        return instance.window;
+        return instance.renderTimer.getWindow();
     }
 
-    private static File getDefaultRootDir() {
-        String osName = System.getProperty("os.name");
-        String userDir = System.getProperty("user.home");
-        Path rootDir;
-        if (osName.startsWith("Windows")) {
-            if (!osName.contains("XP")) {
-                rootDir = Paths.get(userDir, "AppData", "Local", "Forte");
-            } else {
-                rootDir = Paths.get(userDir, "AppData", "Forte");
-            }
-        } else {
-            rootDir = Paths.get(userDir, "Forte");
-        }
-        return rootDir.toFile();
+    public static void stop() {
+        instance.renderTimer.setShouldStop(true);
+        instance.updateTimer.setShouldStop(true);
     }
 
     public static void main(String[] args) {

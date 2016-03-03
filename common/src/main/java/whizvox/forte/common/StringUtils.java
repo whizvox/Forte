@@ -64,4 +64,23 @@ public class StringUtils {
         return name;
     }
 
+    private static final char[] HEX_CHARS = new char[] {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+
+    public static byte[] stringToBytes(String s) {
+        byte[] bytes = new byte[s.length() / 2];
+        for (int i = 0; i < s.length(); i++) {
+            bytes[i / 2] = (byte) (Character.digit(s.charAt(i++), 16) << 4 + Character.digit(s.charAt(i), 16));
+        }
+        return bytes;
+    }
+
+    public static String bytesToString(byte[] bytes) {
+        final StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(HEX_CHARS[b >> 4]);
+            sb.append(HEX_CHARS[b & 0xf]);
+        }
+        return sb.toString();
+    }
+
 }

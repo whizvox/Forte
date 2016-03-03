@@ -82,11 +82,15 @@ public class GLFWUtil {
         if (primaryMonitor != -1) {
             return monitors.get(primaryMonitor);
         }
-        return null;
+        throw new RuntimeException("GLFWUtil is not initialized!");
     }
 
     public static int cbool(boolean b) {
         return b ? GLFW_TRUE : GLFW_FALSE;
+    }
+
+    public static boolean jbool(int b) {
+        return b == GLFW_TRUE;
     }
 
 }

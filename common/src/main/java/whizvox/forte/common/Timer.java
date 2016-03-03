@@ -7,15 +7,12 @@ public abstract class Timer implements Runnable {
     private int limit;
 
     public Timer(int capRate) {
-        if (capRate > 0 && capRate <= 1000) {
-            this.limit = 1000 / capRate;
-        } else {
-            throw new IllegalArgumentException("Invalid cap: " + capRate);
-        }
+        setCap(capRate);
     }
 
     @Override
     public final void run() {
+        begin();
         lastTick = System.currentTimeMillis();
         try {
             while (!shouldStop) {
@@ -23,7 +20,7 @@ public abstract class Timer implements Runnable {
                 if (overflow >= 0) {
                     int sleepTime = limit - overflow;
                     if (sleepTime > 0) {
-                        invoke();
+                        loop();
                         Thread.sleep(sleepTime);
                     }
                     lastTick = System.currentTimeMillis();
@@ -32,13 +29,26 @@ public abstract class Timer implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        end();
     }
 
     public void setShouldStop(boolean shouldStop) {
         this.shouldStop = shouldStop;
     }
 
-    public abstract void invoke();
+    public final void setCap(int cap) {
+        if (cap > 0 && cap <= 1000) {
+            this.limit = 1000 / cap;
+        } else {
+            throw new IllegalArgumentException("Invalid cap: " + cap);
+        }
+    }
+
+    public abstract void begin();
+
+    public abstract void loop();
+
+    public abstract void end();
 
     public static void start(Timer timer) {
         new Thread(timer).start();

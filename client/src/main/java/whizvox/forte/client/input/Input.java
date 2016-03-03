@@ -1,10 +1,11 @@
 package whizvox.forte.client.input;
 
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWCharModsCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import whizvox.forte.client.core.ForteClient;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,39 +24,77 @@ public final class Input {
                 currentProfile.handle(key, action, mods);
             }
         });
-        ForteClient.getWindow().setCallback(new GLFWCharModsCallback() {
-            @Override
-            public void invoke(long window, int codepoint, int mods) {
-
+        Field[] fields = InputProfiles.class.getFields();
+        for (Field f : fields) {
+            if (Modifier.isStatic(f.getModifiers()) && f.getName().startsWith("PROFILE_")) {
+                String name = f.getName().substring(f.getName().indexOf('_') + 1).toLowerCase();
+                try {
+                    addProfile(name, (InputProfile) f.get(null));
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
             }
-        });
+        }
+        if (ForteClient.DEBUG) {
+            setCurrentProfile("debug");
+        } else {
+            profiles.remove("debug");
+        }
     }
 
     public static void poll() {
-        shift = metaKeyHeld(GLFW.GLFW_KEY_LEFT_SHIFT, GLFW.GLFW_KEY_RIGHT_SHIFT);
-        ctrl = metaKeyHeld(GLFW.GLFW_KEY_LEFT_CONTROL, GLFW.GLFW_KEY_RIGHT_CONTROL);
-        alt = metaKeyHeld(GLFW.GLFW_KEY_LEFT_ALT, GLFW.GLFW_KEY_RIGHT_ALT);
-        supre = metaKeyHeld(GLFW.GLFW_KEY_LEFT_SUPER, GLFW.GLFW_KEY_RIGHT_SUPER);
+        shift = metaKeyPressed(GLFW.GLFW_KEY_LEFT_SHIFT, GLFW.GLFW_KEY_RIGHT_SHIFT);
+        ctrl = metaKeyPressed(GLFW.GLFW_KEY_LEFT_CONTROL, GLFW.GLFW_KEY_RIGHT_CONTROL);
+        alt = metaKeyPressed(GLFW.GLFW_KEY_LEFT_ALT, GLFW.GLFW_KEY_RIGHT_ALT);
+        supre = metaKeyPressed(GLFW.GLFW_KEY_LEFT_SUPER, GLFW.GLFW_KEY_RIGHT_SUPER);
     }
 
-    private static boolean metaKeyHeld(int key1, int key2) {
+    public static void addProfile(String key, InputProfile profile) {
+        profiles.put(key, profile);
+    }
+
+    public static void setCurrentProfile(String key) {
+        currentProfile = profiles.get(key);
+    }
+
+    private static boolean metaKeyPressed(int key1, int key2) {
         return GLFW.glfwGetKey(window, key1) == GLFW.GLFW_PRESS || GLFW.glfwGetKey(window, key2) == GLFW.GLFW_PRESS;
     }
 
-    public static boolean isShiftHeld() {
+    private static boolean metaKeyHeld(int mods, int bits) {
+        return (mods & bits) != 0;
+    }
+
+    public static boolean isShiftPressed() {
         return shift;
     }
 
-    public static boolean isCtrlHeld() {
+    public static boolean isCtrlPressed() {
         return ctrl;
     }
 
-    public static boolean isAltHeld() {
+    public static boolean isAltPressed() {
         return alt;
     }
 
-    public static boolean isSuperHeld() {
+    public static boolean isSuperPressed() {
         return supre;
+    }
+
+    public static boolean isShiftHeld(int mods) {
+        return metaKeyHeld(mods, 0b1);
+    }
+
+    public static boolean isCtrlHeld(int mods) {
+        return metaKeyHeld(mods, 0b10);
+    }
+
+    public static boolean isAltHeld(int mods) {
+        return metaKeyHeld(mods, 0b100);
+    }
+
+    public static boolean isSuperHeld(int mods) {
+        return metaKeyHeld(mods, 0b1000);
     }
 
 }

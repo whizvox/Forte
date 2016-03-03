@@ -19,4 +19,9 @@ public class Monitor {
         return obj != null && obj instanceof Monitor && ((Monitor) obj).handle == handle;
     }
 
+    @Override
+    public String toString() {
+        return name + ": " + Long.toHexString(handle) + " (" + width + "," + height + ") " + refreshRate + " Hz";
+    }
+
 }

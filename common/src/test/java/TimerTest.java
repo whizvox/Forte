@@ -4,14 +4,14 @@ public class TimerTest {
 
     private static Timer loggingTimer1 = new Timer(1) {
         @Override
-        public void invoke() {
+        public void loop() {
             System.out.println("Logging once a second");
         }
     };
 
     private static Timer loggingTimer2 = new Timer(2) {
         @Override
-        public void invoke() {
+        public void loop() {
             System.out.println("Logging twice a second");
         }
     };

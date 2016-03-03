@@ -23,7 +23,7 @@ public class Renderer {
     private int numVertices;
     private boolean drawing;
 
-    public void init(int maxVertices) {
+    public Renderer init(int maxVertices) {
         boolean modern = GLFWUtil.supportsModernGL();
         boolean legacy = GLFWUtil.supportsLegacyGL();
         if (modern) {
@@ -47,11 +47,11 @@ public class Renderer {
         drawing = false;
 
         if (modern) {
-            shader_vert = Shader.loadVertex(IOUtils.getInternalResource("resources/default.vert"));
-            shader_frag = Shader.loadFragment(IOUtils.getInternalResource("resources/default.frag"));
+            shader_vert = Shader.loadVertex(IOUtils.getInternalResource("res/default_vertex.glsl"));
+            shader_frag = Shader.loadFragment(IOUtils.getInternalResource("res/default_fragment.glsl"));
         } else {
-            shader_vert = Shader.loadVertex(IOUtils.getInternalResource("resources/legacy.vert"));
-            shader_frag = Shader.loadFragment(IOUtils.getInternalResource("resources/legacy.frag"));
+            shader_vert = Shader.loadVertex(IOUtils.getInternalResource("res/legacy_vertex.glsl"));
+            shader_frag = Shader.loadFragment(IOUtils.getInternalResource("res/legacy_fragment.glsl"));
         }
 
         program = new ShaderProgram();
@@ -73,32 +73,33 @@ public class Renderer {
 
         specifyVertexAttributes();
 
-        int uniTex = program.getUniformLocation("texImage");
+        int uniTex = program.getUniformLocation("u_texture");
         program.setUniform1i(uniTex, 0);
 
         Matrix4f modelMatrix = new Matrix4f();
-        int uniModel = program.getUniformLocation("model");
+        int uniModel = program.getUniformLocation("u_model");
         program.setUniformMatrix4f(uniModel, modelMatrix);
 
         Matrix4f viewMatrix = new Matrix4f();
-        int uniView = program.getUniformLocation("view");
+        int uniView = program.getUniformLocation("u_view");
         program.setUniformMatrix4f(uniView, viewMatrix);
 
         Matrix4f projMatrix = Matrix4f.orthographic(0f, width, 0f, height, -1f, 1f);
-        int uniProj = program.getUniformLocation("projection");
+        int uniProj = program.getUniformLocation("u_projection");
         program.setUniformMatrix4f(uniProj, projMatrix);
+        return this;
     }
 
     protected void specifyVertexAttributes() {
-        int posAttrib = program.getAttributeLocation("position");
+        int posAttrib = program.getAttributeLocation("v_vertPos");
         program.enableVertexAttribute(posAttrib);
         program.pointVertexAttribute(posAttrib, 2, Float.SIZE * 7, 0);
 
-        int colAttrib = program.getAttributeLocation("color");
+        int colAttrib = program.getAttributeLocation("v_color");
         program.enableVertexAttribute(colAttrib);
         program.pointVertexAttribute(colAttrib, 3, Float.SIZE * 7, Float.SIZE * 2);
 
-        int texAttrib = program.getAttributeLocation("texcoord");
+        int texAttrib = program.getAttributeLocation("v_texPos");
         program.enableVertexAttribute(texAttrib);
         program.pointVertexAttribute(texAttrib, 2, Float.SIZE * 7, Float.SIZE * 5);
     }

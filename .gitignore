@@ -9,3 +9,7 @@
 /client/build
 /common/build
 /server/build
+
+# Testing Stuff
+/client/run
+/server/run
